@@ -17,11 +17,23 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { API } from "@/utils/Essentials";
 import socket, { socketemitfunc } from "@/app/sockets/socket";
+import { useAuthContext } from "@/utils/auth";
 
 function page() {
   const recc = Cookies.get("rooms");
   const cc = decryptaes(recc);
   const chatdata = JSON.parse(cc);
+
+  // har jagah yeh krna hai
+
+  const { data } = useAuthContext();
+
+  // if data state already exists then
+  // const { data: user } = useAuthContext();
+
+  // const userid = data?.id hai
+  // console.log(data)
+
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   //  const memoizedText = useMemo(() => text, [text]);

@@ -1,14 +1,16 @@
 "use client";
 import { decryptaes } from "@/app/security";
+import { useAuthContext } from "@/utils/auth";
 import axios from "axios";
 import Cookies from "js-cookie";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 
 function page() {
-  const cookie = Cookies.get("she2202");
-  const cook = decryptaes(cookie);
-  const d = JSON.parse(cook);
+  // const cookie = Cookies.get("she2202");
+  // const cook = decryptaes(cookie);
+  // const d = JSON.parse(cook);
+  const { data } = useAuthContext();
   const [name, setName] = useState("");
   const userdata = async () => {
     try {
@@ -30,7 +32,7 @@ function page() {
   }, []);
   return (
     <div className="h-full w-full sm:pt-1 sm:px-4">
-      <div className="w-full py-4 rounded-2xl pn:max-sm:hidden font-semibold text-[18px] bg-white px-4">
+      <div className="w-full py-4 rounded-2xl pn:max-sm:hidden font-semibold text-[16px] bg-white ">
         Account Settings
       </div>
       <div className="sm:mt-2 w-full h-[100%] sm:h-[90%] sm:rounded-2xl flex space-x-2">

@@ -1,16 +1,105 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Icon from "../../assets/Icon.png";
 import assign from "../../assets/assign.png";
 import arrow from "../../assets/arrow.png";
 import pic from "../../assets/pic.png";
 import Image from "next/image";
+import { useAuthContext } from "@/utils/auth";
+import axios from "axios";
+import { API } from "@/utils/Essentials";
 
 function Addteamtask({ isOpen, onClose }) {
   if (!isOpen) return null;
+  const [memdata, setMemdata] = useState([]);
+  const [team, setTeam] = useState([]);
+  const { data } = useAuthContext();
+  const [load, setLoad] = useState(false);
+  const [teamload, setTeamLoad] = useState(false);
+  const id = data.id;
+  const [assignedteams, setAssignedteams] = useState([]);
+  const [assignedusers, setAssignedusers] = useState([]);
+  const [task, setTask] = useState("");
+  const orgid = data?.orgid[0];
+
+  const func = async () => {
+    try {
+      setLoad(true);
+      const response = await axios.get(
+        `http://localhost:7900/api/getmembers/${data?.orgid?.[0]}`
+      );
+      setMemdata(response?.data);
+      console.log(response?.data);
+    } catch (e) {
+      console.error("Error in finding member", e.message);
+    }
+    setLoad(false);
+  };
+  useEffect(() => {
+    if (data?.orgid?.[0]) {
+      func();
+      getTeams();
+    }
+  }, [data?.orgid?.[0]]);
+
+  const getTeams = async () => {
+    try {
+      setTeamLoad(true);
+      const response = await axios.get(`${API}/getteams/${data?.orgid?.[0]}`);
+      console.log(response.data.teams, "team");
+      setTeam(response.data.teams);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+    setTeamLoad(false);
+    // const team = data.map((i) => i).flat();
+    // setTteam(team);
+    // console.log(tteam);
+  };
+
+  const handleUserClick = (id) => {
+    setAssignedusers((prev) => {
+      // Check if the user is already in the array
+      if (prev.includes(id)) {
+        return prev; // If already included, return the previous array without changes
+      }
+      // Otherwise, add the user id to the array
+      return [...prev, id];
+    });
+  };
+  console.log(assignedusers, "assiusers");
+  const handleTeamClick = (id) => {
+    setAssignedteams((prev) => {
+      if (prev.includes(id)) {
+        return prev; // If already included, return the previous array without changes
+      }
+      return [...prev, id];
+    });
+  };
+  console.log(assignedteams, "assiteams");
+  const givetask = async (req, res) => {
+    try {
+      const response = await axios.post(`${API}/assigntask/${id}`, {
+        assignedteams: assignedteams,
+        assignedusers: assignedusers,
+        task: task,
+        orgid: orgid,
+      });
+      console.log(assignedteams);
+      console.log(response.data, "givetask");
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  // useEffect(() => {
+  //   if (data?.orgid?.[0]) {
+  //     getTeams();
+  //   }
+  // }, [data?.orgid?.[0]]);
+
   return (
     <div className="fixed top-0 left-0 h-screen w-screen flex justify-center items-center bg-opacity-50 bg-gray-800">
-      <div className="bg-red-300 rounded-xl flex-col sm:flex-row p-2 gap-2 flex justify-evenly items-center ">
-        <div className="h-[280px] w-[300px] bg-red-900">
+      <div className=" rounded-xl bg-white pn:max-sm:w-[100%] pn:max-sm:h-[100%] flex-col sm:flex-row p-2 gap-2 flex justify-evenly items-center ">
+        <div className="h-[280px] bg-red-300 w-[300px] ">
           <div className="h-[10%] w-full">
             <div className="text-[16px] text-black flex items-center h-[100%] font-semibold ">
               Add New Task
@@ -18,13 +107,17 @@ function Addteamtask({ isOpen, onClose }) {
             {/* Add your form or other content here */}
           </div>
           <textarea
-            className="p-2 bg-[#FFFBF3] outline-none h-[80%] flex items-start justify-start w-full overflow-auto border-2 rounded-xl border-[#FFC248]"
+            value={task}
+            onChange={(e) => {
+              setTask(e.target.value);
+            }}
+            className="p-2 bg-[#FFFBF3] outline-none h-[90%] flex items-start justify-start w-full overflow-auto border-2 rounded-xl border-[#FFC248]"
             placeholder="What is the task?"
           />
         </div>
-        <div className="flex flex-col bg-green-300  h-[280px] w-[300px]">
+        <div className="flex flex-col bg-green-300 h-[280px] w-[300px]">
           {/* Assigning task options */}
-          <div className="flex flex-row  h-[40px] bg-blue-400 justify-between items-center w-[100%]">
+          <div className="flex flex-row  h-[40px]  justify-between items-center w-[100%]">
             {/* <div className="flex flex-row h-[100%] items-center  w-[45%] justify-between">
               <Image
                 src={assign}
@@ -34,13 +127,14 @@ function Addteamtask({ isOpen, onClose }) {
                 Assign task to
               </div>
             </div> */}
-            <div className="w-[100%] px-2 h-[40px]  flex flex-row rounded-2xl bg-[#ffd993] items-center ">
+            <div className="w-[100%] px-2 h-[40px] bg-[#ffd993]  flex flex-row rounded-2xl  items-center ">
               <Image
                 src={assign}
+                alt="dp"
                 className="h-[25px] w-[25px] object-contain"
               />
               <input
-                className=" w-[100%] h-[100%] pl-2 text-[#121212] bg-[#ffd993] rounded-xl text-[14px] outline-none"
+                className=" w-[100%] h-[100%] pl-2 text-[#121212]  bg-[#ffd993]  rounded-xl text-[14px] outline-none"
                 placeholder=" assign a task"
               />
             </div>
@@ -48,43 +142,81 @@ function Addteamtask({ isOpen, onClose }) {
           </div>
 
           {/* People */}
-          <div className="p-2 bg-yellow-300 h-[230px] flex flex-col items-center w-[100%] overflow-auto rounded-xl [#FFC248]">
-            <div className="w-[98%] my-2 px-2 border-b-[1px] border-[#f1f1f1] h-[40px]  flex flex-row items-center ">
-              <Image src={pic} className="h-[35px] w-[35px] object-contain" />
-              <div className=" mx-3  w-[40%] text-[#121212] text-[14px]  outline-none">
-                Rosie Gray
+          <div className="p-2  h-[230px] flex-col flex  items-center w-[100%] overflow-auto rounded-xl [#FFC248]">
+            {load ? (
+              <div className="w-[98%] my-2 px-2 border-b-[1px]  border-[#f1f1f1] h-[40px]  flex flex-row items-center ">
+                <div className="h-[35px] w-[35px] object-contain bg-[#888] rounded-full" />
+                <div className=" mx-3  w-[40%] text-[#121212] text-[14px]  outline-none"></div>
+                <div className=" text-[#444444] text-[13px]  outline-none"></div>
               </div>
-              <div className=" text-[#444444] text-[13px]  outline-none">
-                16 task on progress
-              </div>
+            ) : (
+              memdata.map((f, i) => (
+                <div
+                  key={i}
+                  onClick={() => handleUserClick(f?._id)}
+                  className="w-[98%] hover:bg-red-400 my-2 px-2 border-b-[1px]  border-[#f1f1f1] h-[40px]  flex flex-row items-center "
+                >
+                  <Image
+                    alt="dp"
+                    src={pic}
+                    className="h-[35px] w-[35px] object-contain"
+                  />
+                  <div className=" mx-3  w-[40%] text-[#121212] text-[14px]  outline-none">
+                    {f?.name}
+                  </div>
+                  <div className=" text-[#444444] text-[13px]  outline-none">
+                    16 task on progress
+                  </div>
+                </div>
+              ))
+            )}
+
+            <div className="w-[98%] my-2 px-2 border-b-[1px] font-semibold  border-[#f1f1f1] h-[40px]  flex flex-row items-center ">
+              Teams
             </div>
-            <div className="w-[98%] my-2 px-2 border-b-[1px] border-[#f1f1f1] h-[40px] overflow-x-scroll scrollbar-hide  flex flex-row items-center ">
-              <Image src={pic} className="h-[35px] w-[35px] object-contain" />
-              <div className=" mx-3  w-[40%] text-[#121212] text-[14px]  outline-none">
-                Rosie Gray
+            {teamload ? (
+              <div className="w-[98%] my-2 px-2 border-b-[1px]  border-[#f1f1f1] h-[40px]  flex flex-row items-center ">
+                <div className="h-[35px] w-[35px] object-contain bg-[#888] rounded-full" />
+
+                <div className=" mx-3  w-[40%] text-[#121212] text-[14px]  outline-none"></div>
+                <div className=" text-[#444444] text-[13px]  outline-none"></div>
               </div>
-              <div className=" text-[#444444] text-[13px]  outline-none">
-                16 task on progress
-              </div>
-            </div>{" "}
-            <div className="w-[98%] my-2 px-2 border-b-[1px] border-[#f1f1f1] h-[40px]  flex flex-row items-center ">
-              <Image src={pic} className="h-[35px] w-[35px] object-contain" />
-              <div className=" mx-3  w-[40%] text-[#121212] text-[14px]  outline-none">
-                Rosie Gray
-              </div>
-              <div className=" text-[#444444] text-[13px]  outline-none">
-                16 task on progress
-              </div>
-            </div>
+            ) : (
+              team.map((g, i) => (
+                <div
+                  key={i}
+                  onClick={() => handleTeamClick(g?._id)}
+                  className="w-[98%] hover:bg-red-400 my-2 px-2 border-b-[1px]  border-[#f1f1f1] h-[40px]  flex flex-row items-center "
+                >
+                  <Image
+                    alt="dp"
+                    src={pic}
+                    className="h-[35px] w-[35px] object-contain"
+                  />
+                  <div className=" mx-3  w-[40%] text-[#121212] text-[14px]  outline-none">
+                    {g?.teamname}
+                  </div>
+                  <div className=" text-[#444444] text-[13px]  outline-none">
+                    16 task on progress
+                  </div>
+                </div>
+              ))
+            )}
           </div>
-          <div className="flex flex-row justify-between bg-yellow-700 items-center w-[100%] h-[10%]">
+          <div className="flex flex-row justify-between  items-center w-[100%] h-[10%]">
             <div
               onClick={onClose}
               className="w-[50%] py-2 flex justify-center items-center text-black text-[14px] font-semibold h-[100%] bg-white rounded-3xl"
             >
               Cancel
             </div>
-            <div className="w-[50%] py-2 flex justify-center items-center text-black text-[14px] font-semibold h-[100%] bg-[#FFC248] rounded-3xl">
+            <div
+              onClick={() => {
+                givetask();
+                onClose();
+              }}
+              className="w-[50%] py-2 flex justify-center items-center text-black text-[14px] font-semibold h-[100%] bg-[#FFC248] rounded-3xl"
+            >
               Save Task
             </div>
           </div>

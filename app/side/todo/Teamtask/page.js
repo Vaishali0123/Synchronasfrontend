@@ -13,16 +13,19 @@ import Cookies from "js-cookie";
 import { decryptaes } from "@/app/security";
 import { API } from "@/utils/Essentials";
 import moment from "moment";
+import { useAuthContext } from "@/utils/auth";
 
 function page() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [teamtasks, setTeamtasks] = useState(false);
   const [done, setDone] = useState(1);
   const [tasks, setGetTasks] = useState([]);
-  const cookie = Cookies.get("she2202");
-  const cook = decryptaes(cookie);
-  const d = JSON.parse(cook);
-
+  const [assignedtasks, setAssignedasks] = useState([]);
+  // const cookie = Cookies.get("she2202");
+  // const cook = decryptaes(cookie);
+  // const d = JSON.parse(cook);
+  const { data } = useAuthContext();
+  const id = data.id;
   const openModal = () => {
     setIsModalOpen(true);
   };
@@ -53,30 +56,43 @@ function page() {
 
   const getTasks = useCallback(async () => {
     try {
-      const res = await axios.post(`${API}/fetchalltasks`, { id: d?._id });
-      setGetTasks(res.data);
+      const res = await axios.get(`${API}/getAssignedTasks/${id}`);
+
+      setAssignedasks(res?.data?.assignedTasks);
     } catch (error) {
       console.log(error);
     }
-  }, []);
+  }, [id]);
 
   useEffect(() => {
-    getTasks();
-  }, []);
+    if (id) {
+      getTasks();
+    }
+  }, [id]);
+
+  const combinedTasks = [
+    ...assignedtasks.map((task) => ({
+      ...task,
+      type: "task",
+      timestamp: task.createdAt,
+    })),
+  ];
+
+  combinedTasks.sort((a) => new Date(a.timestamp));
 
   return (
-    <div className="font-sans scrollbar-hide flex flex-col justify-evenly items-center">
+    <div className="font-sans scrollbar-hide h-[100%] flex flex-col justify-evenly items-center">
       {/* Tasks */}
-      <div className="h-[80vh] w-[95%] bg-[#EAEEF4]  rounded-2xl  flex flex-col justify-between items-center object-contain">
-        <div className="h-[10%] w-[95%] flex items-center ">
+      <div className="h-[100%] w-[100%] bg-[#EAEEF4]  rounded-2xl  flex flex-col justify-between items-center object-contain">
+        <div className="p-2 pl-4 w-[100%] flex items-center ">
           <div className="text-[14px] text-[#444444] font-semibold">
-            Total: {tasks?.tasks?.length || 0} tasks
+            Total: {tasks?.tasks?.length || 0} Team Tasks
           </div>
         </div>
 
         <div className="h-[90%] scrollbar-hide overflow-auto  w-[100%] flex flex-col justify-start items-center">
-          {tasks?.tasks?.length < 1 ? (
-            <>
+          {assignedtasks.length < 1 ? (
+            <div className="h-full w-full flex flex-col justify-center items-center">
               {/* for empty task */}
               <Image src={pic} className="h-[300px] w-[300px]" />
               <div className="flex flex-row items-center justify-between">
@@ -85,10 +101,10 @@ function page() {
                   No tasks found.
                 </div>
               </div>
-            </>
+            </div>
           ) : (
             <>
-              {tasks?.tasks?.map((task, index) => {
+              {combinedTasks.map((task, index) => {
                 return (
                   <div
                     key={index}
@@ -103,9 +119,22 @@ function page() {
                         />
                       </div>
 
-                      <div className="w-[85%] h-[60%] px-2 flex flex-col">
-                        <div className="font-bold font-sans text-[14px] text-black">
-                          {task?.name || "Unknown"}
+                      <div className="w-[85%]  h-[60%] px-2 flex flex-col">
+                        <div className=" flex flex-row  py-1">
+                          {task?.assignedusers != []
+                            ? task?.assignedusers.map((u, i) => (
+                                <div className="font-bold font-sans  text-[14px] text-black">
+                                  {u?.name || "Unknown"} ,
+                                </div>
+                              ))
+                            : null}
+                          {task?.assignedteams != []
+                            ? task?.assignedteams.map((t, i) => (
+                                <div className="font-bold font-sans  text-[14px] text-black">
+                                  , {t?.teamName || "Unknown"}
+                                </div>
+                              ))
+                            : null}
                         </div>
                         <div className="text-[14px] text-[#414141]">You</div>
                       </div>
@@ -119,7 +148,7 @@ function page() {
                     <div className="w-[98%] m-2 flex flex-row bg-[#FFF8EB] rounded-2xl text-black">
                       <div className="w-[95%] p-4">
                         <div className="text-[14px]  text-black">
-                          {task.text}
+                          {task?.task}
                         </div>
                       </div>
 

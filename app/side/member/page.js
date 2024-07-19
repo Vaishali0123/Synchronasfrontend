@@ -23,11 +23,11 @@ import { useSelector } from "react-redux";
 import { receiverData } from "@/lib/receiverSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import { API } from "@/utils/Essentials";
+import { useAuthContext } from "@/utils/auth";
 
 function page() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const [data, setData] = useState([]);
   const [allorganizations, setAllorganizations] = useState([]);
   const [createteam, setCreateteam] = useState(false);
   const [teamname, setTeamname] = useState("");
@@ -37,10 +37,11 @@ function page() {
   const [team, setTeam] = useState([]);
   const [userdata, setUserdata] = useState([]);
   const [receiver_id, setReceiver_id] = useState();
-  const cookie = Cookies.get("she2202");
-  const cook = decryptaes(cookie);
-  const d = JSON.parse(cook);
+  // const cookie = Cookies.get("she2202");
+  // const cook = decryptaes(cookie);
+  // const d = JSON.parse(cook);
   const [memdata, setMemdata] = useState([]);
+  const { data } = useAuthContext();
 
   const gochat = async () => {
     router.push(`../side/teamchat`);
@@ -49,27 +50,19 @@ function page() {
   const func = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:7900/api/getmembers/${d?.orgid}`
+        `http://localhost:7900/api/getmembers/${data?.orgid?.[0]}`
       );
       setMemdata(response?.data);
       console.log(response?.data);
-      // const matchedOrg = data.find(
-      //   (org) => org.organization === d.organization
-      // );
-      // if (matchedOrg) {
-      //   const organizationId = matchedOrg._id;
-      //   setOrgid(organizationId);
-      // } else {
-      //   console.log("No matching organization found");
-      // }
     } catch (e) {
       console.error("Error in finding member", e.message);
     }
   };
   useEffect(() => {
-    func();
-  }, []);
-  console.log(d, "d");
+    if (data?.orgid?.[0]) {
+      func();
+    }
+  }, [data?.orgid?.[0]]);
   // Fetching users data
   // const id = useSelector((state) => state.user.id);
   // console.log(id);
@@ -197,9 +190,9 @@ function page() {
 
   const getTeams = async () => {
     try {
-      const response = await axios.get(`${API}/getteams/${d?.orgid?.[0]}`);
+      const response = await axios.get(`${API}/getteams/${data?.orgid?.[0]}`);
+
       setTeam(response.data.teams);
-      console.log(response.data.teams, "team");
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -208,26 +201,24 @@ function page() {
     // console.log(tteam);
   };
 
-  console.log(team);
-
   useEffect(() => {
-    if (d?.orgid?.[0]) {
+    if (data?.orgid?.[0]) {
       getTeams();
     }
-  }, [d?.orgid?.[0]]);
+  }, [data?.orgid?.[0]]);
   return (
-    <div className="h-[100%] w-full scrollbar-hide flex flex-col items-center sm:pt-1 sm:px-4">
+    <div className="h-[100%] w-full scrollbar-hide flex flex-col items-center ">
       {/* Search members */}
-      <div className=" w-full py-4 sm:rounded-2xl pn:max-sm:hidden font-semibold text-[18px] bg-white px-2  flex flex-row items-center justify-between">
-        <div className=" w-[60%] text-[18px] px-4 font-semibold  flex flex-row rounded-xl items-center justify-between">
+      <div className=" w-full py-2 sm:rounded-2xl pn:max-sm:hidden font-semibold text-[18px] bg-white px-2 flex flex-row items-center justify-between">
+        <div className="  text-[16px] px-4 font-semibold flex flex-row rounded-xl items-center justify-between">
           Members & teams
         </div>
 
         {/* Storage used */}
-        <div className="w-[40%] h-[100%] flex flex-row justify-evenly items-center">
+        <div className="h-[100%] gap-2 flex flex-row justify-evenly items-center">
           <div
             onClick={openModal}
-            className=" rounded-xl flex h-[37px] w-[150px] border-2 text-[14px] text-white bg-[#FFC248] border-[#FFC248] justify-center items-center font-semibold"
+            className=" rounded-xl flex text-[14px] py-2 w-[150px] border-2  text-white bg-[#FFC248] border-[#FFC248] justify-center items-center font-semibold"
           >
             + Create new team
           </div>
@@ -286,10 +277,11 @@ function page() {
         </div>
       </div>
       {/* Team */}
-      <div className=" text-[#5A5A5A] text-[14px] h-full sm:h-[45%] bg-white sm:p-1 sm:rounded-2xl mt-2 w-full flex flex-col items-center">
+      <div className=" text-[#5A5A5A] text-[14px] h-full  sm:h-[45%] bg-white sm:p-1 sm:rounded-2xl mt-2 w-full flex flex-col items-center">
         {/* Header */}
+        <div className="w-[100%] pn:max-sm:hidden pl-2 text-md">Teams </div>
         <div className="flex flex-row bg-[#FFF8EB] sm:rounded-2xl font-bold w-[100%] h-[10%] items-center pn:max-sm:hidden justify-evenly">
-          <div className=" w-[45%] px-4 justify-center items-center flex">
+          <div className=" w-[45%] px-4 justify-start items-start flex">
             Team name
           </div>
           <div className=" w-[15%] flex justify-center items-center">
@@ -330,12 +322,12 @@ function page() {
                     </div>
                   </div>
                   <div className="w-[15%] pn:max-sm:hidden text-[12px] flex justify-center items-center">
-                    {f?.totalMembers}
+                    {f?.members?.length}
                   </div>
 
                   <div className="w-[20%] pn:max-sm:hidden text-[12px] flex justify-center items-center">
                     <div className="w-[20px] flex justify-start items-center ">
-                      {f?.admin?._id !== d?._id && (
+                      {f?.admin?._id !== data?.id && (
                         <div onClick={() => joinTeams(f?._id)}>join</div>
                       )}
                       <MdDeleteOutline className="h-[20px] w-[20px] text-red-400" />
@@ -366,7 +358,7 @@ function page() {
       <div className=" text-[#5A5A5A] text-[14px] h-full sm:h-[42%] bg-white sm:p-1 sm:rounded-2xl mt-2 w-full flex flex-col items-center">
         {/* Header */}
         <div className="flex flex-row bg-[#FFF8EB] sm:rounded-2xl font-bold w-[100%] h-[10%] items-center pn:max-sm:hidden justify-evenly">
-          <div className=" w-[45%] px-4 justify-center items-center flex">
+          <div className=" w-[45%] px-4 justify-start items-center flex">
             Name
           </div>
           <div className=" w-[15%] flex justify-center items-center">Role</div>

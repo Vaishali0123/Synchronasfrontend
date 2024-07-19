@@ -11,6 +11,7 @@ import Cookies from "js-cookie";
 import { userData } from "@/lib/userSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import { API } from "@/utils/Essentials";
+import { useAuthContext } from "@/utils/auth";
 // import firebase from "../../../firebase";
 
 // // Define the functional component
@@ -20,9 +21,9 @@ function LoginPage() {
   const [email, setEmail] = useState(""); // State for email input
   const [password, setPassword] = useState(""); // State for password input
   const [organization, setOrganization] = useState("");
+  const { setData } = useAuthContext();
 
   const checklogin = async () => {
-  
     try {
       const response = await axios.post(`${API}/signin`, {
         email: email,
@@ -32,10 +33,20 @@ function LoginPage() {
 
       if (response.data.success) {
         const details = response.data.user;
-        const postdata = JSON.stringify(details);
-        const dis = encryptaes(postdata);
-        Cookies.set("she2202", dis);
+        // const postdata = JSON.stringify(details);
+        // const dis = encryptaes(postdata);
+        // Cookies.set("she2202", dis);
 
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 7);
+
+        Cookies.set("nexo-data-1", response.data.access_token, {
+          expires: expirationDate,
+        });
+        Cookies.set("nexo-data-2", response.data.refresh_token, {
+          expires: expirationDate,
+        });
+        setData(response.data.data);
         dispatch(
           userData({
             id: details._id,
@@ -49,6 +60,8 @@ function LoginPage() {
         router.push("../main/signup");
       }
     } catch (e) {
+      // try kro login save to kro maharaj
+      // ek min
       console.error("Error logging in", e.message);
     }
   };

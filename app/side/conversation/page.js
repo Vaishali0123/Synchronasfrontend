@@ -15,6 +15,7 @@ import { API } from "@/utils/Essentials";
 import { receiverData } from "@/lib/receiverSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
+import { useAuthContext } from "@/utils/auth";
 
 function page() {
   const router = useRouter();
@@ -27,11 +28,13 @@ function page() {
   // const chatdata = JSON.parse(cc);
   // const receiverId = d._id;
   // const senderId = chatdata.rid;
-  const [data, setData] = useState([]);
+  const [dataa, setDataa] = useState([]);
   const [memdata, setMemdata] = useState([]);
   const [convId, setConvId] = useState("");
   const [click, setClick] = useState(1);
-
+  const { data } = useAuthContext();
+  console.log(data);
+  console.log(`${data?.id}`);
   // const func = async () => {
   //   try {
   //     const response = await axios.get(
@@ -89,21 +92,27 @@ function page() {
   };
 
   const fetchconv = async () => {
+    console.log("ll");
     try {
-      const res = await axios.get(`${API}/getconv/${d?._id}`);
+      const res = await axios.get(`${API}/getconv/${data?.id}`);
+
       console.log(res.data.data, "convdata");
-      setData(res?.data?.data);
+      setDataa(res?.data?.data);
     } catch (e) {
       console.log("Messages not fetched", e.message);
     }
   };
+
   useEffect(() => {
-    fetchconv();
-  }, []);
+    if (data?.id) {
+      fetchconv();
+    }
+  }, [data?.id]);
+
   return (
     <div className="bg-white w-[100%] h-[100%] flex flex-col">
       {/* Header */}
-      <div className="w-[100%] md:h-[100px] bg-white pn:max-sm:h-[70px] flex flex-row items-center justify-evenly border-b-2 border-[#000]">
+      <div className="w-[100%] md:h-[60px] bg-white pn:max-sm:h-[70px] flex flex-row  items-center gap-2 pl-2 border-b-2 border-[#000]">
         <div className="text-white p-2 px-4 rounded-lg bg-[#FFC977]">Chats</div>
         <div className="text-white p-2 px-4 rounded-lg bg-[#FFC977]">
           Discuss
@@ -111,7 +120,7 @@ function page() {
       </div>
       {/* Conversations */}
       <div className="h-[90%] bg-[#f1f1f1] w-[100%]">
-        {data.map((d, i) => (
+        {dataa.map((d, i) => (
           <div
             key={i}
             onClick={() => {

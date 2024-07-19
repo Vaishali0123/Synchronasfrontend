@@ -17,13 +17,14 @@ import { useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import { decryptaes } from "@/app/security";
 import moment from "moment";
+import { useAuthContext } from "@/utils/auth";
 
 function page() {
-  const cookie = Cookies.get("she2202");
-  const cook = decryptaes(cookie);
-  const d = JSON.parse(cook);
-
-  const [data, setData] = useState([]);
+  // const cookie = Cookies.get("she2202");
+  // const cook = decryptaes(cookie);
+  // const d = JSON.parse(cook);
+  const { data } = useAuthContext();
+  const [dataa, setDataa] = useState([]);
   const [uploadpop, setUploadpop] = useState(false);
   const [filename, setFilename] = useState("");
   const [filestorage, setFilestorage] = useState("");
@@ -32,8 +33,8 @@ function page() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("id", d?._id);
-      formData.append("orgid", d?.orgid[0]);
+      formData.append("id", data?.id);
+      formData.append("orgid", data?.orgid[0]);
 
       const response = await axios.post(`${API}/uploadtostorage`, formData);
       if (response.status === 200) {
@@ -50,9 +51,11 @@ function page() {
 
   const fetchstorage = useCallback(async () => {
     try {
-      const res = await axios.post(`${API}/fetchstorage`, { id: d?.orgid[0] });
+      const res = await axios.post(`${API}/fetchstorage`, {
+        id: data?.orgid[0],
+      });
       if (res.data.success) {
-        setData(res.data.storage);
+        setDataa(res.data.storage);
         setFilestorage(res.data.storageused);
       }
     } catch (e) {
@@ -63,7 +66,7 @@ function page() {
   const handledel = async (o) => {
     try {
       const res = await axios.post(`${API}/deleteitem`, {
-        id: d?.orgid[0],
+        id: data?.orgid[0],
         sid: o,
       });
       if (res.data.success) {
@@ -91,12 +94,12 @@ function page() {
   }
 
   return (
-    <div className="h-[100%] w-full scrollbar-hide  flex flex-col items-center sm:pt-1 sm:px-4 ">
+    <div className="h-[100%] w-full scrollbar-hide  flex flex-col items-center ">
       <div className="bg-white w-full sm:rounded-2xl">
-        <div className="h-[60px] w-full flex flex-row items-center px-2 justify-between">
-          <div className="font-semibold text-[18px] px-2">Storage</div>
+        <div className="h-[60px] w-full py-2 flex flex-row pn:max-sm:flex-col items-center px-2 justify-between">
+          <div className="font-semibold text-[16px] px-2">Storage</div>
           {/* Storage used */}
-          <div className="w-[45%] pn:max-sm:w-[100%]  h-[50px] flex flex-col items-center justify-center">
+          <div className="w-[45%] pn:max-sm:w-[100%] h-[50px] flex flex-col items-center justify-center">
             <div className="flex flex-row items-center  w-[100%]">
               <div className="px-2 w-full flex flex-col gap-1">
                 <div className="text-sm text-[#615E83]">
@@ -177,14 +180,57 @@ function page() {
           <div className=" w-[18%]">Last updated</div>
           <div className=" w-[20%]">Uploaded by</div>
         </div>
+        <div
+          // key={i}
+          className="flex flex-row w-[100%] h-[50px] items-center justify-between border-b-[1px] border-[#f1f1f1]"
+        >
+          <div className="flex items-center sm:w-[30%] w-[70%] px-1 space-x-2">
+            <Image
+              alt="img"
+              src={file}
+              className="h-[35px] w-[35px] object-contain"
+            />
+            <div className="w-[50%] bg-slate-600">
+              <div className=" truncate bg-green-300 ">
+                {/* {d.filename} */}{" "}
+                fsdsfffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+              </div>
+              <div className=" sm:hidden px-1">
+                {/* {convertFromBytes(d.size)} */}fds
+              </div>
+            </div>
+          </div>
+          <div className="w-[15%] pn:max-sm:hidden px-1">
+            {/* {" "}
+                    {convertFromBytes(d.size)} */}
+            fsd
+          </div>
+          <div className=" w-[18%] pn:max-sm:hidden px-1">
+            {/* {moment(d?.date).fromNow()} */}fsd
+          </div>
+          <div className=" w-[18%] pn:max-sm:hidden px-1">
+            {/* {moment(d?.createdAt).fromNow()} */}dfs
+          </div>
+          <div className=" w-[15%] pn:max-sm:hidden px-1">
+            {/* {d?.userid?.email} */}dsf
+          </div>
+          <div
+            // onClick={() => {
+            //   handledel(data?._id);
+            // }}
+            className=" sm:w-[5%] w-[20px] flex justify-start items-center"
+          >
+            <MdDeleteOutline className="h-[20px] w-[20px] text-red-400" />
+          </div>
+        </div>
         {/* Files data */}
-        {data.length === 0 ? (
+        {dataa.length === 0 ? (
           <div className="h-[50px] w-[100%] py-[10vh] text-black font-bold flex justify-center items-center">
             No files uploaded
           </div>
         ) : (
-          <div className="w-[100%] flex flex-col items-center justify-evenly">
-            {data.map((d, i) => (
+          <div className="w-[100%] flex flex-col  items-center justify-evenly">
+            {dataa.map((d, i) => (
               <>
                 <div
                   key={i}
@@ -197,7 +243,9 @@ function page() {
                       className="h-[35px] w-[35px] object-contain"
                     />
                     <div>
-                      <div className=" ">{d.filename}</div>
+                      <div className=" truncate bg-green-300 w-[30%]">
+                        {d.filename}
+                      </div>
                       <div className=" sm:hidden px-1">
                         {convertFromBytes(d.size)}
                       </div>
@@ -218,7 +266,7 @@ function page() {
                   </div>
                   <div
                     onClick={() => {
-                      handledel(d?._id);
+                      handledel(data?._id);
                     }}
                     className=" sm:w-[5%] w-[20px] flex justify-start items-center"
                   >

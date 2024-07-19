@@ -17,12 +17,14 @@ import { FaListUl } from "react-icons/fa";
 import { MdOutlineChatBubbleOutline } from "react-icons/md";
 import { RiGroupLine } from "react-icons/ri";
 import { RiSettings2Line } from "react-icons/ri";
+import { useAuthContext } from "@/utils/auth";
 
 function Sidebar() {
   const [click, setClick] = useState(1);
-  const cookie = Cookies.get("she2202");
-  const cook = decryptaes(cookie);
-  const d = JSON.parse(cook);
+  // const cookie = Cookies.get("she2202");
+  // const cook = decryptaes(cookie);
+  // const d = JSON.parse(cook);
+  const { data } = useAuthContext();
   //console.log(d, "d");
   const [name, setName] = useState("");
   // const userdata = async () => {
@@ -55,7 +57,7 @@ function Sidebar() {
           </div>
           {/* name */}
           <div className="flex flex-col mx-2">
-            <div className="text-[14px] font-semibold">{d?.name}</div>
+            <div className="text-[14px] font-semibold">{data?.name}</div>
             <div className="text-[12px] ">Admin</div>
           </div>
         </div>
