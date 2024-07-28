@@ -219,7 +219,7 @@ function page() {
                   email,
                   fullname,
                   password,
-                  image: JSON.stringify(encodeURIComponent(imge)),
+                  // image: JSON.stringify(encodeURIComponent(imge)),
                 },
               }}
             >

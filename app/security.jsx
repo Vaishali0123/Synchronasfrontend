@@ -24,13 +24,13 @@ export const encryptaes = (data) => {
 
 export const decryptaes = (data) => {
   try {
-    let d;
-    if (typeof data !== "string") {
-      d = JSON.stringify(data);
-    } else {
-      d = data;
-    }
-    const encryptedBytes = aesjs.utils.hex.toBytes(d);
+    // let d;
+    // if (typeof data !== "string") {
+    //   d = JSON.stringify(data);
+    // } else {
+    //   d = data;
+    // }
+    const encryptedBytes = aesjs.utils.hex.toBytes(data);
     const aesCtr = new aesjs.ModeOfOperation.ctr(key, new aesjs.Counter(5));
     const decryptedBytes = aesCtr.decrypt(encryptedBytes);
 

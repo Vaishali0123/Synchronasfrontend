@@ -22,12 +22,12 @@ function page() {
 
   const email = search.get("email");
   const image = search.get("image");
-  console.log(
-    JSON.parse(decodeURIComponent(image)),
-    image,
-    decodeURIComponent(image),
-    "kkk"
-  );
+  // console.log(
+  //   JSON.parse(decodeURIComponent(image)),
+  //   image,
+  //   decodeURIComponent(image),
+  //   "kkk"
+  // );
   const fullname = search.get("fullname");
   const password = search.get("password");
 
@@ -35,7 +35,7 @@ function page() {
   const dispatch = useDispatch();
   console.log(
     email,
-    image,
+    // image,
     fullname,
     password,
     "email, fullname, password, image"

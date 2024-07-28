@@ -20,14 +20,19 @@ import socket, { socketemitfunc } from "@/app/sockets/socket";
 import { useAuthContext } from "@/utils/auth";
 
 function page() {
-  const recc = Cookies.get("rooms");
-  const cc = decryptaes(recc);
-  const chatdata = JSON.parse(cc);
-
-  // har jagah yeh krna hai
-
+  //const chatdata = JSON.parse(cc);
+  const [chatdata, setChatdata] = useState(null);
   const { data } = useAuthContext();
 
+  useEffect(() => {
+    const recc = Cookies.get("rooms");
+    if (recc) {
+      const cc = decryptaes(recc);
+      if (cc) {
+        setChatdata(JSON.parse(cc));
+      }
+    }
+  }, [Cookies]);
   // if data state already exists then
   // const { data: user } = useAuthContext();
 
@@ -37,17 +42,17 @@ function page() {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   //  const memoizedText = useMemo(() => text, [text]);
-  const cookie = Cookies.get("she2202");
-  const cook = decryptaes(cookie);
-  const d = JSON.parse(cook);
+  // const cookie = Cookies.get("she2202");
+  // const cook = decryptaes(cookie);
+  // const d = JSON.parse(cook);
   const [mssgsdata, setMssgsdata] = useState([]);
   // const rec = Cookies.get("r_id");
   // const receive = decryptaes(rec);
   // const receiver_id = JSON.parse(receive); //Receiver id in string
   // const [receiveddata, setReceiveddata] = useState([]);
-  const room = chatdata.convId;
-  const userid = d._id;
-  const receiver_id = chatdata.rid;
+  const room = chatdata?.convId;
+  const userid = data.id;
+  const receiver_id = chatdata?.rid;
 
   //const socket = useMemo(() => io("http://localhost:3003"), []);
 
@@ -100,13 +105,13 @@ function page() {
     fetchmssgs();
     socketemitfunc({
       event: "joinRoom",
-      data: { userId: d?._id, roomId: d?._id },
+      data: { userId: data?.id, roomId: data?.id },
     });
     return () => {
       socket.off("ms");
       socket.close();
     };
-  }, [d?._id, socket]);
+  }, [data?.id, socket]);
 
   const fetchmssgs = async () => {
     try {
@@ -129,7 +134,7 @@ function page() {
       let data = {
         receiver_id: chatdata?.rid,
         text: message,
-        sender: d?._id,
+        sender: data?.id,
         time: Date.now(),
       };
       socket.emit("chatMessage", { roomId: chatdata?.rid, data: data });
@@ -142,7 +147,7 @@ function page() {
         setMessage("");
         const res = await axios.post(`${API}/savemsg`, {
           convId: room,
-          senderId: d?._id,
+          senderId: data?.id,
           receiverId: chatdata?.rid,
           text: message,
         });
@@ -168,7 +173,9 @@ function page() {
     <div className="h-[100%] bg-white font-sans w-[100%] flex flex-col">
       {/* Add member */}
       <div className="h-[10%] w-[100%] flex flex-row">
-        <div className="h-[100%] w-[70%] px-2">{chatdata.rusername}</div>
+        <div className="h-[100%] w-[70%] px-2">
+          {chatdata?.rusername || "username"}
+        </div>
         <div className="h-[100%] w-[30%] flex flex-row items-center justify-evenly">
           <Image
             src={pic}
