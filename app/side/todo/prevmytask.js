@@ -4,7 +4,7 @@ import pic from "../../../assets/empty.png";
 import task from "../../../assets/task.png";
 import redflag from "../../../assets/redflag.png";
 import greenflag from "../../../assets/greenflag.png";
-import { FaAngleDown } from "react-icons/fa6";
+
 import Image from "next/image";
 import TaskModal from "../../Compo/Addtask";
 import TeamModal from "../../Compo/Addteamtask";
@@ -21,16 +21,14 @@ function page() {
   const [done, setDone] = useState(1);
   const [tasks, setTasks] = useState([]);
   const [assignedtasks, setAssignedtasks] = useState([]);
-  const [statusindex, setStatusindex] = useState(-1);
   // const cookie = Cookies.get("she2202");
   // const cook = decryptaes(cookie);
   // const d = JSON.parse(cook);
   const [load, setLoad] = useState("load");
-  const [click, setClick] = useState(false);
-  const [clickself, setClickself] = useState(false);
-  const [selfindex, setSelfindex] = useState(-1);
+
   const { data } = useAuthContext();
-  const id = data.id;
+  console.log(data, "ll");
+  const id = data?.id;
   const today = moment().format("MMMM Do, YYYY");
   console.log(today); // Outputs: "July 12th, 2024"
   const [isExpanded, setIsExpanded] = useState(false);
@@ -65,11 +63,11 @@ function page() {
   const handleImageClick = async ({ taskid, id }) => {
     try {
       setDone(!done);
-      const res = await axios.post(`${API}/updatetask, {
+      const res = await axios.post(`${API}/updatetask`, {
         id,
         taskid,
         status: done ? "completed" : "pending",
-      }`);
+      });
     } catch (error) {
       console.log(error);
     }
@@ -163,7 +161,7 @@ function page() {
                       return (
                         <div
                           key={index}
-                          className="w-[99%] items-center justify-center gap-1 space-y-2 p-2 px-2 rounded-2xl bg-[#fff] flex flex-col"
+                          className="w-[98%] items-center justify-center gap-1 space-y-2 p-2 px-2 rounded-2xl bg-[#888] flex flex-col"
                         >
                           <div className=" w-full items-center justify-between flex flex-row">
                             <div className="flex justify-center items-center">
@@ -199,51 +197,10 @@ function page() {
                                     id: data.id,
                                   });
                                 }}
-                                className=" object-contain text-[14px] bg-[#00ff7774] px-2 rounded-full border-[1px] text-green-600 relative
-                                 border-green-600 flex items-center gap-2 justify-center"
+                                className=" object-contain text-[14px] bg-[#00ff7774] px-2 rounded-full border-[1px] text-green-600
+                                 border-green-600 flex items-start justify-center"
                               >
-                                <div> Done </div>
-                                <FaAngleDown
-                                  onClick={() => {
-                                    setClickself(!clickself);
-                                    setSelfindex(index);
-                                  }}
-                                />
-                                <div
-                                  className={`duration-100 ${
-                                    clickself === true && index === selfindex
-                                      ? "h-auto w-auto text-[#474747] font-medium top-5 bg-white p-1 shadow-md rounded-lg absolute text-[14px] "
-                                      : "h-0 w-0 text-[0px] shadow-sm p-0"
-                                  }`}
-                                >
-                                  <div
-                                    className={`${
-                                      clickself === true
-                                        ? "hover:bg-[#f8f8f8] rounded-lg py-1 duration-100 cursor-pointer px-2"
-                                        : " py-0 duration-100 cursor-pointer px-0"
-                                    }`}
-                                  >
-                                    To do
-                                  </div>
-                                  <div
-                                    className={`${
-                                      clickself === true
-                                        ? "hover:bg-[#f8f8f8] rounded-lg py-1 duration-100 cursor-pointer px-2"
-                                        : "py-0 duration-100 cursor-pointer px-0"
-                                    }`}
-                                  >
-                                    In progress
-                                  </div>
-                                  <div
-                                    className={`${
-                                      clickself === true
-                                        ? "hover:bg-[#f8f8f8] rounded-lg py-1 duration-100 cursor-pointer px-2"
-                                        : " py-0 duration-100 cursor-pointer px-0"
-                                    }`}
-                                  >
-                                    Done{" "}
-                                  </div>
-                                </div>
+                                Done
                               </div>
                             </div>
                           </div>
@@ -300,8 +257,8 @@ function page() {
                                 {formattedDay}, {formattedTime}, {formattedDate}
                               </div>
                               {/* <div className="text-[14px] text-[#414141] ">
-                              {moment(item?.task?.assignedAt).fromNow()}
-                            </div> */}
+                                {moment(item?.task?.assignedAt).fromNow()}
+                              </div> */}
                               <div
                                 onClick={() => {
                                   handleImageClick({
@@ -309,50 +266,9 @@ function page() {
                                     id: data.id,
                                   });
                                 }}
-                                className=" object-contain bg-[#00ff7774] text-[14px]  px-2 rounded-full border-[1px] text-green-600 border-green-600 flex relative items-start justify-center"
+                                className=" object-contain bg-[#00ff7774] text-[14px]  px-2 rounded-full border-[1px] text-green-600 border-green-600 flex items-start justify-center"
                               >
-                                <div>{item?.task?.progress}</div>
-                                <FaAngleDown
-                                  onClick={() => {
-                                    setClick(!click);
-                                    setStatusindex(index);
-                                  }}
-                                />
-                                <div
-                                  className={`duration-100 ${
-                                    click === true && statusindex === index
-                                      ? "h-auto w-auto text-[#474747] font-medium top-5 bg-white p-1 shadow-md rounded-lg absolute text-[14px] "
-                                      : "h-0 w-0 text-[0px] shadow-sm p-0"
-                                  }`}
-                                >
-                                  <div
-                                    className={`${
-                                      click === true
-                                        ? "hover:bg-[#f8f8f8] rounded-lg py-1 duration-100 cursor-pointer px-2"
-                                        : " py-0 duration-100 cursor-pointer px-0"
-                                    }`}
-                                  >
-                                    To do
-                                  </div>
-                                  <div
-                                    className={`${
-                                      click === true
-                                        ? "hover:bg-[#f8f8f8] rounded-lg py-1 duration-100 cursor-pointer px-2"
-                                        : "py-0 duration-100 cursor-pointer px-0"
-                                    }`}
-                                  >
-                                    In progress
-                                  </div>
-                                  <div
-                                    className={`${
-                                      click === true
-                                        ? "hover:bg-[#f8f8f8] rounded-lg py-1 duration-100 cursor-pointer px-2"
-                                        : " py-0 duration-100 cursor-pointer px-0"
-                                    }`}
-                                  >
-                                    Done{" "}
-                                  </div>
-                                </div>
+                                {item?.task?.progress}
                               </div>
                             </div>
                           </div>

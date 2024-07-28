@@ -15,12 +15,31 @@ import { API } from "@/utils/Essentials";
 
 function page() {
   const router = useRouter();
-  const { id, email, image, name, password } = useSelector(
-    (state) => state.user
-  );
   const search = useSearchParams();
+  // const fsd = search.get("data");
+  // const fsdd = fsd ? JSON.parse(fsd) : null;
+  // console.log(JSON.parse(decodeURIComponent(fsdd?.image)), "fsdd");
+
+  const email = search.get("email");
+  const image = search.get("image");
+  console.log(
+    JSON.parse(decodeURIComponent(image)),
+    image,
+    decodeURIComponent(image),
+    "kkk"
+  );
+  const fullname = search.get("fullname");
+  const password = search.get("password");
+
+  console.log(email, "ll");
   const dispatch = useDispatch();
-  // const [email, setEmail] = useState("");
+  console.log(
+    email,
+    image,
+    fullname,
+    password,
+    "email, fullname, password, image"
+  );
   const [username, setUsername] = useState("");
   //const [password, setPassword] = useState("");
   const [org, setOrg] = useState("");
@@ -80,7 +99,7 @@ function page() {
       const response = await axios.post(`${API}/signup`, {
         org,
         email,
-        username,
+        username: fullname,
         jobrole,
         password,
         image,
@@ -161,7 +180,7 @@ function page() {
                 {/* Enter industry */}
                 <div>
                   <div className="text-[14px] font-sans font-semibold text-black">
-                    Name
+                    Name <span className="text-red-500">*</span>
                   </div>
                   <input
                     value={org}
@@ -221,7 +240,7 @@ function page() {
 
                 <div>
                   <div className="text-[14px] font-sans font-semibold text-black">
-                    Enter Your Job Role
+                    Enter Your Job Role <span className="text-red-500">*</span>
                   </div>
                   <input
                     value={jobrole}

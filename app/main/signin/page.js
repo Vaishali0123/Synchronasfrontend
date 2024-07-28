@@ -12,6 +12,7 @@ import { userData } from "@/lib/userSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import { API } from "@/utils/Essentials";
 import { useAuthContext } from "@/utils/auth";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 // import firebase from "../../../firebase";
 
 // // Define the functional component
@@ -22,9 +23,13 @@ function LoginPage() {
   const [password, setPassword] = useState(""); // State for password input
   const [organization, setOrganization] = useState("");
   const { setData } = useAuthContext();
+  const [load, setLoad] = useState(false);
 
   const checklogin = async () => {
     try {
+      setLoad(true);
+
+      console.log(email, password, organization);
       const response = await axios.post(`${API}/signin`, {
         email: email,
         pass: password,
@@ -33,13 +38,9 @@ function LoginPage() {
 
       if (response.data.success) {
         const details = response.data.user;
-        // const postdata = JSON.stringify(details);
-        // const dis = encryptaes(postdata);
-        // Cookies.set("she2202", dis);
 
         const expirationDate = new Date();
         expirationDate.setDate(expirationDate.getDate() + 7);
-
         Cookies.set("nexo-data-1", response.data.access_token, {
           expires: expirationDate,
         });
@@ -60,10 +61,10 @@ function LoginPage() {
         router.push("../main/signup");
       }
     } catch (e) {
-      // try kro login save to kro maharaj
-      // ek min
+      console.log("get llll");
       console.error("Error logging in", e.message);
     }
+    setLoad(false);
   };
 
   return (
@@ -143,12 +144,18 @@ function LoginPage() {
           </div>
 
           {/* Sign In */}
-          <button
-            onClick={checklogin}
-            className="bg-[#e0a54c] hover:bg-[#E48700] text-white font-bold text-[14px] flex justify-center items-center rounded-full py-2 shadow-lg w-[240px]"
-          >
-            Continue
-          </button>
+          {load ? (
+            <div className="animate-spin">
+              <AiOutlineLoading3Quarters />
+            </div>
+          ) : (
+            <button
+              onClick={checklogin}
+              className="bg-[#e0a54c] hover:bg-[#E48700] text-white font-bold text-[14px] flex justify-center items-center rounded-full py-2 shadow-lg w-[240px]"
+            >
+              Continue
+            </button>
+          )}
         </div>
       </div>
     </div>

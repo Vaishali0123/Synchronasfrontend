@@ -18,27 +18,41 @@ import Cookies from "js-cookie";
 import { decryptaes } from "@/app/security";
 import moment from "moment";
 import { useAuthContext } from "@/utils/auth";
+import { IoCloudUploadOutline } from "react-icons/io5";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { RxCross2 } from "react-icons/rx";
 
 function page() {
   // const cookie = Cookies.get("she2202");
   // const cook = decryptaes(cookie);
   // const d = JSON.parse(cook);
   const { data } = useAuthContext();
+  const orgid = data?.orgid?.[0];
   const [dataa, setDataa] = useState([]);
   const [uploadpop, setUploadpop] = useState(false);
   const [filename, setFilename] = useState("");
   const [filestorage, setFilestorage] = useState("");
+  const [load, setLoad] = useState(false);
+  const [del, setDel] = useState(-1);
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFilename(file.name);
+
+      uploadfile(file); // Uncomment this line to call uploadfile with the selected file
+    }
+  };
 
   const uploadfile = async (file) => {
     try {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("id", data?.id);
-      formData.append("orgid", data?.orgid[0]);
+      formData.append("orgid", data?.orgid?.[0]);
 
       const response = await axios.post(`${API}/uploadtostorage`, formData);
+
       if (response.status === 200) {
-        console.log(response.data.message); // Log the success message from the server
         fetchstorage();
         setUploadpop(false);
       } else {
@@ -51,9 +65,7 @@ function page() {
 
   const fetchstorage = useCallback(async () => {
     try {
-      const res = await axios.post(`${API}/fetchstorage`, {
-        id: data?.orgid[0],
-      });
+      const res = await axios.get(`${API}/fetchstorage/${orgid}`);
       if (res.data.success) {
         setDataa(res.data.storage);
         setFilestorage(res.data.storageused);
@@ -61,12 +73,13 @@ function page() {
     } catch (e) {
       console.log(e);
     }
-  }, []);
+  }, [orgid]);
 
   const handledel = async (o) => {
     try {
+      setLoad(true);
       const res = await axios.post(`${API}/deleteitem`, {
-        id: data?.orgid[0],
+        id: orgid,
         sid: o,
       });
       if (res.data.success) {
@@ -75,23 +88,46 @@ function page() {
     } catch (e) {
       console.log(e);
     }
+    setLoad(false);
   };
 
   useEffect(() => {
-    fetchstorage();
-  }, []);
+    if (orgid) {
+      fetchstorage();
+    }
+  }, [orgid]);
+
+  // Truncate text
+  const truncatetext = (text, limit) => {
+    if (text.length <= limit) return text;
+    return text.slice(0, limit) + "...";
+  };
 
   function convertFromBytes(bytes) {
     if (bytes >= 1024 * 1024 * 1024) {
-      return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+      return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " TB";
     } else if (bytes >= 1024 * 1024) {
-      return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+      return (bytes / (1024 * 1024)).toFixed(2) + " GB";
     } else if (bytes >= 1024) {
-      return (bytes / 1024).toFixed(2) + " KB";
+      return (bytes / 1024).toFixed(2) + " MB";
     } else {
-      return bytes + " Bytes";
+      return bytes + " KB";
     }
   }
+
+  function convertFromBytess(bytes) {
+    if (bytes >= 1024 * 1024 * 1024) {
+      return (bytes / (1024 * 1024 * 1024)).toFixed(2);
+    } else if (bytes >= 1024 * 1024) {
+      return (bytes / (1024 * 1024)).toFixed(2);
+    } else if (bytes >= 1) {
+      return (bytes / 1024).toFixed(2);
+    } else {
+      return bytes;
+    }
+  }
+
+  const widthPercentage = (filestorage / 10000000000) * 100; // Calculate the width percentage
 
   return (
     <div className="h-[100%] w-full scrollbar-hide  flex flex-col items-center ">
@@ -111,15 +147,19 @@ function page() {
                       {convertFromBytes(filestorage)}
                     </div>
                     <div className="text-[#121212] text-[12px] w-[70%] justify-end flex">
-                      15 GB
+                      10 GB
                     </div>
                   </div>
                 </div>
                 <div className="w-full h-3 relative overflow-hidden min-w-[100px] bg-[#e2e2ff] rounded-full">
                   <div
-                    style={{ width: "40%" }}
-                    className="absolute top-0 left-0 rounded-r-xl z-10 bg-[#08A0F7] h-full "
-                  ></div>
+                    style={{
+                      width: `${widthPercentage}%`,
+                    }}
+                    className="absolute top-0 left-0  rounded-r-xl z-10 bg-[#08A0F7] h-full  "
+                  >
+                    <div className="h-full bg-[#08A0F7]"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -167,62 +207,21 @@ function page() {
         </div>
         {/* 2nd header */}
         <div className="flex flex-row pn:max-sm:hidden w-[100%] h-[50px] items-center justify-evenly">
-          <div className="flex items-center sm:w-[30%] w-[70%] px-2 space-x-2">
+          <div className="flex items-center sm:w-[30%] w-[75%] px-2 space-x-2 ">
             <Image
               src={Checkbox}
               alt="img"
               className="h-[20px] w-[20px] object-contain"
             />
-            <div className=" ">File name</div>
+            <div className="text-black font-semibold">File name</div>
           </div>
-          <div className="w-[15%]">File size</div>
-          <div className=" w-[18%]">Date uploaded</div>
-          <div className=" w-[18%]">Last updated</div>
-          <div className=" w-[20%]">Uploaded by</div>
+          <div className="w-[15%] text-black font-semibold ">File size</div>
+          <div className=" w-[18%] text-black font-semibold">Date uploaded</div>
+          {/* <div className=" w-[18%] text-black font-semibold">Last updated</div> */}
+          <div className=" w-[15%] text-black font-semibold">Uploaded by</div>
+          <div className=" w-[5%] text-black font-semibold">Action</div>
         </div>
-        <div
-          // key={i}
-          className="flex flex-row w-[100%] h-[50px] items-center justify-between border-b-[1px] border-[#f1f1f1]"
-        >
-          <div className="flex items-center sm:w-[30%] w-[70%] px-1 space-x-2">
-            <Image
-              alt="img"
-              src={file}
-              className="h-[35px] w-[35px] object-contain"
-            />
-            <div className="w-[50%] bg-slate-600">
-              <div className=" truncate bg-green-300 ">
-                {/* {d.filename} */}{" "}
-                fsdsfffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-              </div>
-              <div className=" sm:hidden px-1">
-                {/* {convertFromBytes(d.size)} */}fds
-              </div>
-            </div>
-          </div>
-          <div className="w-[15%] pn:max-sm:hidden px-1">
-            {/* {" "}
-                    {convertFromBytes(d.size)} */}
-            fsd
-          </div>
-          <div className=" w-[18%] pn:max-sm:hidden px-1">
-            {/* {moment(d?.date).fromNow()} */}fsd
-          </div>
-          <div className=" w-[18%] pn:max-sm:hidden px-1">
-            {/* {moment(d?.createdAt).fromNow()} */}dfs
-          </div>
-          <div className=" w-[15%] pn:max-sm:hidden px-1">
-            {/* {d?.userid?.email} */}dsf
-          </div>
-          <div
-            // onClick={() => {
-            //   handledel(data?._id);
-            // }}
-            className=" sm:w-[5%] w-[20px] flex justify-start items-center"
-          >
-            <MdDeleteOutline className="h-[20px] w-[20px] text-red-400" />
-          </div>
-        </div>
+
         {/* Files data */}
         {dataa.length === 0 ? (
           <div className="h-[50px] w-[100%] py-[10vh] text-black font-bold flex justify-center items-center">
@@ -242,9 +241,9 @@ function page() {
                       src={file}
                       className="h-[35px] w-[35px] object-contain"
                     />
-                    <div>
-                      <div className=" truncate bg-green-300 w-[30%]">
-                        {d.filename}
+                    <div className="w-[80%]">
+                      <div className=" w-[100%]">
+                        {truncatetext(d.filename, 30)}
                       </div>
                       <div className=" sm:hidden px-1">
                         {convertFromBytes(d.size)}
@@ -255,22 +254,32 @@ function page() {
                     {" "}
                     {convertFromBytes(d.size)}
                   </div>
+
                   <div className=" w-[18%] pn:max-sm:hidden px-1">
-                    {moment(d?.date).fromNow()}
+                    {/* {moment(d.createdAt).format("HH:mm")} */}
+
+                    {moment(d.createdAt).format("MMMM Do, YYYY")}
                   </div>
-                  <div className=" w-[18%] pn:max-sm:hidden px-1">
+                  {/* <div className=" w-[18%] pn:max-sm:hidden px-1">
                     {moment(d?.createdAt).fromNow()}
-                  </div>
+                  </div> */}
                   <div className=" w-[15%] pn:max-sm:hidden px-1">
                     {d?.userid?.email}
                   </div>
                   <div
                     onClick={() => {
-                      handledel(data?._id);
+                      setDel(i);
+                      handledel(dataa?._id);
                     }}
                     className=" sm:w-[5%] w-[20px] flex justify-start items-center"
                   >
-                    <MdDeleteOutline className="h-[20px] w-[20px] text-red-400" />
+                    {load && del === i ? (
+                      <div className="animate-spin">
+                        <AiOutlineLoading3Quarters />
+                      </div>
+                    ) : (
+                      <MdDeleteOutline className="h-[20px] w-[20px] text-red-400" />
+                    )}
                   </div>
                 </div>
               </>
@@ -280,12 +289,49 @@ function page() {
       </div>
       {uploadpop && (
         <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-4 rounded-md">
-            <input
-              type="file"
-              onChange={(e) => uploadfile(e.target.files[0])}
-            />
-            <button onClick={() => setUploadpop(false)}>Cancel</button>
+          <div className="bg-white p-4 rounded-xl">
+            <div className="flex flex-rowvw-[100%]">
+              <div className="text-black text-[14px] font-bold w-[90%]">
+                Media Upload
+              </div>
+              <RxCross2
+                onClick={() => setUploadpop(false)}
+                color="#000"
+                size={15}
+                className="w-[10%] "
+              />
+              {/* <div
+                onClick={() => setUploadpop(false)}
+                className="text-black text-[14px]  w-[10%]  items-center justify-center flex"
+              >
+                x
+              </div> */}
+            </div>
+
+            <div className=" text-[13px] text-[#888] mb-2">
+              Add your documents here to upload files
+            </div>
+            <div className="border-2 border-[#FFC248] border-dashed h-[200px]  rounded-xl flex-col items-center justify-evenly flex">
+              <IoCloudUploadOutline color="#FFC248" size={30} />
+              <div className="items-center justify-center flex">
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  className="justify-center items-center flex w-[70%]  text-[14px]"
+                  // onChange={(e) => {
+                  //   setFilename(e.target.files[0]);
+                  //   // uploadfile(e.target.files[0]);
+                  // }}
+                />
+                {/* <div>{filename && <p>Selected file: {filename}</p>}</div> */}
+              </div>
+              <div className=" text-[13px] text-[#888]">
+                Max 10 MB files are allowed
+              </div>
+              <div className="text-[#0075ff] font-bold text-[14px]">Upload</div>
+            </div>
+
+            {/* <button>Cancel</button> */}
           </div>
         </div>
       )}

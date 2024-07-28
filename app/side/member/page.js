@@ -164,7 +164,7 @@ function page() {
   const create = async () => {
     try {
       const res = await axios.post(
-        `${API}/v1/createteam/${d?._id}/${d?.orgid?.[0]}`,
+        `${API}/v1/createteam/${data?.id}/${data?.orgid?.[0]}`,
         {
           teamname,
           email,
@@ -285,14 +285,14 @@ function page() {
             Team name
           </div>
           <div className=" w-[15%] flex justify-center items-center">
-            Members
+            No. of Members
           </div>
           <div className=" w-[20%] flex justify-center items-center">
             Action
           </div>
-          <div className=" w-[20%] flex justify-center items-center">
+          {/* <div className=" w-[20%] flex justify-center items-center">
             Discuss
-          </div>
+          </div> */}
         </div>
 
         {/*Members data */}
@@ -310,7 +310,7 @@ function page() {
                   key={i}
                   className="flex flex-row my-2 w-[100%]  h-[75px] items-center  border-b-[1px] border-[#f1f1f1]"
                 >
-                  <div className="flex items-center pn:max-sm:w-[30%]  w-[45%] space-x-2 px-2">
+                  <div className="flex items-center pn:max-sm:w-[30%]  w-[55%] space-x-2 px-2">
                     <Image
                       alt="pic"
                       src={pic}
@@ -321,32 +321,32 @@ function page() {
                       <div className="text-[12px] ">{f?.admin?.name}</div>
                     </div>
                   </div>
-                  <div className="w-[15%] pn:max-sm:hidden text-[12px] flex justify-center items-center">
+                  <div className="w-[15%]  pn:max-sm:hidden text-[12px] flex justify-center items-center">
                     {f?.members?.length}
                   </div>
 
-                  <div className="w-[20%] pn:max-sm:hidden text-[12px] flex justify-center items-center">
+                  {/* <div className="w-[20%] pn:max-sm:hidden text-[12px] flex justify-center items-center">
                     <div className="w-[20px] flex justify-start items-center ">
                       {f?.admin?._id !== data?.id && (
                         <div onClick={() => joinTeams(f?._id)}>join</div>
                       )}
                       <MdDeleteOutline className="h-[20px] w-[20px] text-red-400" />
                     </div>
-                  </div>
-                  <div
+                  </div> */}
+                  {/* <div
                     onClick={() => {
                       router.push(
                         `../side/teamchat?teamId=${f?._id}&userId=${d?._id}`
                       );
                     }}
-                    className="w-[20%]  h-full flex flex-row items-center justify-center"
+                    className="w-[20%]   h-full flex flex-row items-center justify-center"
                   >
                     <Image
                       src={chat}
                       alt="chat"
                       className="w-[20px] h-[20px] resize"
                     />
-                  </div>
+                  </div> */}
                 </div>
               )
               // : null

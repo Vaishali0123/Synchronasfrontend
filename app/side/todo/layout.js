@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useAuthContext } from "@/utils/auth";
 
 export default function SideLayout({ children }) {
-  const [swtch, setSwtch] = useState(0);
+  const [swtch, setSwtch] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [teamtasks, setTeamtasks] = useState(false);
   const [done, setDone] = useState(1);
