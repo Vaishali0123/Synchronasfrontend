@@ -28,6 +28,8 @@ function page() {
   const [clickself, setClickself] = useState(false);
   const [selfindex, setSelfindex] = useState(-1);
   const { data } = useAuthContext();
+  const [viewtask, setViewtask] = useState(true);
+  const [viewindex, setViewindex] = useState(0);
   const id = data.id;
   const openModal = () => {
     setIsModalOpen(true);
@@ -87,15 +89,11 @@ function page() {
   const getTeams = async () => {
     try {
       const response = await axios.get(`${API}/getteams/${data?.orgid?.[0]}`);
-      const updatedTeams = response.data.teams.map((team) => {
-        // If the current user is member of the team than show the team there else not
-        const filteredMembers = team.members.filter(
-          (member) => member._id === data?.id
-        );
-        return {
-          ...team,
-        };
-      });
+
+      const updatedTeams = response.data.teams.filter((team) =>
+        team.members.some((member) => member._id === data?.id)
+      );
+
       setTeam(updatedTeams);
       //setTeam(response.data.teams);
     } catch (error) {
@@ -200,10 +198,24 @@ function page() {
                         </div>
                       </div>
                     </div>
-                    <div className="w-[98%] m-2 flex flex-col  bg-[#FFF8EB] rounded-2xl text-black">
+                    <div className="w-[98%] m-2  flex flex-col  bg-[#FFF8EB]  rounded-2xl text-black">
+                      <div
+                        onClick={() => {
+                          setViewtask(!viewtask);
+                          setViewindex(index);
+                        }}
+                        className="w-[100%] flex items-center justify-center underline hover:text-slate-500"
+                      >
+                        {viewindex === index && viewtask ? "View all" : "Hide"}
+                      </div>
                       {team?.assignedtasks?.length > 0 ? (
                         sortedAssignedTasks.map((m, i) => (
-                          <div key={i} className="w-[95%] p-4 border-b-[1px] ">
+                          <div
+                            key={i}
+                            className={`w-[95%] 
+                              
+                            p-4 border-b-[1px] `}
+                          >
                             <div>
                               <div className="text-[14px] w-[100%]   text-[#414141] ">
                                 <div className="  flex justify-between items-center">
@@ -211,7 +223,10 @@ function page() {
                                     Assigned by: {m?.assignedBy?.name}
                                   </div>
                                   <div className="text-[14px] text-[#414141] ">
-                                    {moment(m.createdAt).fromNow()}
+                                    {/* {moment(m.createdAt).fromNow()} */}
+                                    {moment(m.createdAt).format(
+                                      "MMMM Do, YYYY"
+                                    )}
                                   </div>
                                 </div>
                               </div>

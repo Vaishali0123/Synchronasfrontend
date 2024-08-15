@@ -18,42 +18,53 @@ import { MdOutlineChatBubbleOutline } from "react-icons/md";
 import { RiGroupLine } from "react-icons/ri";
 import { RiSettings2Line } from "react-icons/ri";
 import { useAuthContext } from "@/utils/auth";
+import { API } from "@/utils/Essentials";
 
 function Sidebar() {
   const [click, setClick] = useState(1);
-  // const cookie = Cookies.get("she2202");
-  // const cook = decryptaes(cookie);
-  // const d = JSON.parse(cook);
   const { data } = useAuthContext();
-  //console.log(d, "d");
-  const [name, setName] = useState("");
-  // const userdata = async () => {
-  //   try {
-  //     const response = await axios.get("http://localhost:7900/api/get/alldata");
-  //     const data = response.data;
 
-  //     const userid = data.find((e) => e._id === d._id);
-  //     if (userid) {
-  //       setName(userid.username);
-  //     } else {
-  //       console.log("Not getting user");
-  //     }
-  //   } catch (e) {
-  //     console.error("No User found", e.message);
-  //   }
-  // };
-  // useEffect(() => {
-  //   userdata();
-  // }, []);
+  const [profile, setProfile] = useState("");
+  const [name, setName] = useState("");
+  const userdata = async () => {
+    try {
+      const response = await axios.get(`${API}/getuserdata/${data.id}`);
+
+      setProfile(response?.data?.profile);
+      console.log(response?.data, "response.data");
+      // const userid = data.find((e) => e._id === d._id);
+      // if (userid) {
+      //   setName(userid.username);
+      // } else {
+      //   console.log("Not getting user");
+      // }
+    } catch (e) {
+      console.error("No User found", e.message);
+    }
+  };
+  useEffect(() => {
+    if (data.id) {
+      userdata();
+    }
+  }, [data.id]);
   return (
     <div className="bg-[#FFFBF3] pn:max-md:hidden h-screen w-[280px] font-sans scrollbar-hide flex flex-col text-[#414141]">
       <div className="h-[15%] w-[100%] flex flex-row  items-center justify-center">
         {/* top */}
         <div className="w-[85%] flex flex-row">
           {/* dp */}
-          <div className="h-[40px] w-[40px] rounded-full bg-yellow-500 ">
-            <div className="h-[40px] w-[40px] rounded-full bg-red-50 -ml-[3px] border-2 border-yellow-500 -mt-[3px]" />
-            {/* <Image src={pic} className="h-[38px] w-[38px] object-contain" /> */}
+          <div className="h-[40px] w-[40px] rounded-full bg-yellow-500 justify-center items-center flex ">
+            {profile != "" ? (
+              <Image
+                src={profile}
+                alt="Profile Image"
+                width={40}
+                height={40}
+                className=" object-contain rounded-full"
+              />
+            ) : (
+              <div className="h-[40px] w-[40px] rounded-full bg-red-50 -ml-[3px] border-2 border-yellow-500 -mt-[3px]" />
+            )}
           </div>
           {/* name */}
           <div className="flex flex-col mx-2">
@@ -140,9 +151,9 @@ function Sidebar() {
           </div>
         </Link>
       </div>
-      <div className="h-[30%] flex justify-center items-end object-contain">
+      {/* <div className="h-[30%] flex justify-center items-end object-contain">
         <Image alt="pic" src={upgrade} />
-      </div>
+      </div> */}
     </div>
   );
 }

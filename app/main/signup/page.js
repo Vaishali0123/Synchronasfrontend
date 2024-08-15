@@ -9,63 +9,99 @@ import { useDispatch } from "react-redux";
 import { userData } from "@/lib/userSlice";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { API } from "@/utils/Essentials";
 
 // import firebase from "../../../firebase";
 // import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-
+const convertImageToDataURL = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
 function page() {
   const router = useRouter();
-  const dispatch = useDispatch();
-  const [email, setEmail] = useState("");
 
-  const [fullname, setFullname] = useState("");
+  const dispatch = useDispatch();
+  const [email, setEmail] = useState("sync@gmail.com");
+
+  const [fullname, setFullname] = useState("Synchronas");
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState("12345678");
   const [imge, setImge] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post(`${API}/signup`, {
+        email,
+        username: fullname,
 
-  // const validateEmail = (email) => {
-  //   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  //   return emailRegex.test(email);
-  // };
-  // Select file
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setImageUrl(imageUrl);
-      setImge(file);
-      console.log(file, "love");
-      console.log(imageUrl, "hate");
+        password,
+        imge,
+      });
+      if (response.status === 200) {
+        router.push("../main/signedup");
+      } else {
+        console.log("User unable to signup");
+      }
+
+      // dispatch(
+      //   userData({ id: response.data._id, orgname: orgname, email: email })
+      // );
+      //  console.log("User created:", response.data);
+
+      // router.push("../side/todo");
+    } catch (error) {
+      console.error("Error creating user:", error.message);
+      // Handle the error (e.g., display an error message to the user)
     }
   };
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+  // Select file
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      //const imageUrl = await convertImageToDataURL(file);
+      setImageUrl(imageUrl);
+      setImge(file);
+    }
+  };
   const func = async () => {
     try {
-      // const ema = await validateEmail(email);
-      console.log(email, fullname);
-      if (email && password.length > 7 && fullname) {
-        dispatch(
-          userData({ name: fullname, email, password, image: imageUrl })
-        );
+      const mail = await validateEmail(email);
+
+      if (mail && password.length > 6 && fullname && imge) {
+        // dispatch(
+        //   userData({ name: fullname, email:mail, password, image: imageUrl })
+        // );
+        const formdata = new FormData();
+        formdata.append("dp", imge);
+        formdata.append("email", email);
+        formdata.append("username", fullname);
+        formdata.append("password", password);
         console.log("done");
-        router.push(
-          "../main/signedup"
-          // query: {
-          //   email,
-          //   fullname,
-          //   password,
-          //   // image: imageUrl,
-          // },
-        );
+
+        const response = await axios.post(`${API}/signup`, formdata);
+        console.log(response?.data, "res");
+        if (response.status === 200) {
+          localStorage.setItem('email',email),
+          router.push("../main/signedup");
+        }
       } else {
-        console.log(email && password.length > 7 && imge && fullname);
-        if (password.length <= 7) {
+        if (password.length <= 6) {
           toast.error("Enter password more than 7 letters");
         } else {
           toast.error(
-            "Details Missing",
-            email && password.length > 7 && imge && fullname
+            "Incorrect details",
+            mail && password.length > 6 && imge && fullname
           );
         }
       }
@@ -211,7 +247,7 @@ function page() {
               </div>
             </div>
             {/* Next page */}
-            <Link
+            {/* <Link
               className="bg-[#ffc061] hover:bg-[#E48700] mt-8 text-white font-bold text-[16px] flex justify-center items-center rounded-full py-3 shadow-lg w-[350px]"
               href={{
                 pathname: "../main/signedup",
@@ -219,18 +255,18 @@ function page() {
                   email,
                   fullname,
                   password,
-                  // image: JSON.stringify(encodeURIComponent(imge)),
+                  // image: encodeURIComponent(imageUrl),
                 },
               }}
             >
               Continue
-            </Link>
-            {/* <div
+            </Link> */}
+            <div
               onClick={func}
               className="bg-[#ffc061] hover:bg-[#E48700] mt-8 text-white font-bold text-[16px] flex justify-center items-center rounded-full py-3 shadow-lg w-[350px]"
             >
               Continue
-            </div> */}
+            </div>
           </div>
         </div>
       </div>

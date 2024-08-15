@@ -34,6 +34,7 @@ function page() {
   const [filestorage, setFilestorage] = useState("");
   const [load, setLoad] = useState(false);
   const [del, setDel] = useState(-1);
+  const [error, setError] = useState(null);
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -68,6 +69,7 @@ function page() {
       const res = await axios.get(`${API}/fetchstorage/${orgid}`);
       if (res.data.success) {
         setDataa(res.data.storage);
+        console.log(res.data.storage, "res.data.storage");
         setFilestorage(res.data.storageused);
       }
     } catch (e) {
@@ -76,6 +78,8 @@ function page() {
   }, [orgid]);
 
   const handledel = async (o) => {
+    console.log(o, "sid");
+    console.log(orgid, "orgid");
     try {
       setLoad(true);
       const res = await axios.post(`${API}/deleteitem`, {
@@ -89,6 +93,32 @@ function page() {
       console.log(e);
     }
     setLoad(false);
+  };
+
+  const handledownload = async (objectName) => {
+    try {
+      const response = await fetch(
+        `${API}/downloadfile/?key=${encodeURIComponent(objectName)}`
+      );
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } else {
+        console.error("Failed to download file");
+        setError("Failed to download file");
+      }
+    } catch (err) {
+      console.error("An error occurred:", err);
+      setError("An error occurred while downloading the file");
+    }
   };
 
   useEffect(() => {
@@ -207,19 +237,20 @@ function page() {
         </div>
         {/* 2nd header */}
         <div className="flex flex-row pn:max-sm:hidden w-[100%] h-[50px] items-center justify-evenly">
-          <div className="flex items-center sm:w-[30%] w-[75%] px-2 space-x-2 ">
+          <div className="flex items-center sm:w-[30%] w-[60%] px-2 space-x-2 ">
             <Image
               src={Checkbox}
               alt="img"
               className="h-[20px] w-[20px] object-contain"
             />
-            <div className="text-black font-semibold">File name</div>
+            <div className="text-black w-[100%] font-semibold">File name</div>
           </div>
-          <div className="w-[15%] text-black font-semibold ">File size</div>
-          <div className=" w-[18%] text-black font-semibold">Date uploaded</div>
+          <div className="w-[10%] text-black font-semibold ">File size</div>
+          <div className=" w-[10%] text-black font-semibold">Date uploaded</div>
           {/* <div className=" w-[18%] text-black font-semibold">Last updated</div> */}
-          <div className=" w-[15%] text-black font-semibold">Uploaded by</div>
+          <div className=" w-[10%] text-black font-semibold">Uploaded by</div>
           <div className=" w-[5%] text-black font-semibold">Action</div>
+          <div className=" w-[5%] text-black font-semibold">Download</div>
         </div>
 
         {/* Files data */}
@@ -233,9 +264,9 @@ function page() {
               <>
                 <div
                   key={i}
-                  className="flex flex-row w-[100%] h-[50px] items-center justify-between border-b-[1px] border-[#f1f1f1]"
+                  className="flex flex-row w-[100%] h-[50px]  items-center justify-evenly border-b-[1px] border-[#f1f1f1]"
                 >
-                  <div className="flex items-center sm:w-[30%] w-[70%] px-1 space-x-2">
+                  <div className="flex  items-center sm:w-[30%] w-[60%] px-1 space-x-2">
                     <Image
                       alt="img"
                       src={file}
@@ -250,12 +281,12 @@ function page() {
                       </div>
                     </div>
                   </div>
-                  <div className="w-[15%] pn:max-sm:hidden px-1">
+                  <div className="w-[10%]  justify-center pn:max-sm:hidden px-1">
                     {" "}
                     {convertFromBytes(d.size)}
                   </div>
 
-                  <div className=" w-[18%] pn:max-sm:hidden px-1">
+                  <div className=" w-[10%] pn:max-sm:hidden px-1">
                     {/* {moment(d.createdAt).format("HH:mm")} */}
 
                     {moment(d.createdAt).format("MMMM Do, YYYY")}
@@ -263,15 +294,15 @@ function page() {
                   {/* <div className=" w-[18%] pn:max-sm:hidden px-1">
                     {moment(d?.createdAt).fromNow()}
                   </div> */}
-                  <div className=" w-[15%] pn:max-sm:hidden px-1">
+                  <div className=" w-[10%] pn:max-sm:hidden px-1">
                     {d?.userid?.email}
                   </div>
                   <div
                     onClick={() => {
                       setDel(i);
-                      handledel(dataa?._id);
+                      handledel(d?._id);
                     }}
-                    className=" sm:w-[5%] w-[20px] flex justify-start items-center"
+                    className=" sm:w-[5%]  w-[5%] flex justify-center items-center"
                   >
                     {load && del === i ? (
                       <div className="animate-spin">
@@ -280,6 +311,15 @@ function page() {
                     ) : (
                       <MdDeleteOutline className="h-[20px] w-[20px] text-red-400" />
                     )}
+                  </div>
+
+                  <div
+                    onClick={() => {
+                      handledownload(d?.objectName);
+                    }}
+                    className="p-2 hover:bg-slate-100 rounded-xl border-2 text-[12px] text-black font-semibold justify-center items-center"
+                  >
+                    Download
                   </div>
                 </div>
               </>

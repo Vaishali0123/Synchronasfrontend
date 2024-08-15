@@ -7,9 +7,10 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import Link from "next/link";
 import { useAuthContext } from "@/utils/auth";
+import { API } from "@/utils/Essentials";
 
 export default function SideLayout({ children }) {
-  const [swtch, setSwtch] = useState(1);
+  const [swtch, setSwtch] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [teamtasks, setTeamtasks] = useState(false);
   const [done, setDone] = useState(1);
@@ -17,6 +18,24 @@ export default function SideLayout({ children }) {
   const openModal = () => {
     setIsModalOpen(true);
   };
+  const userdata = async () => {
+    try {
+      const response = await axios.get(`${API}/getuserdata/${data.id}`);
+      //setProfile(response?.data);
+      console.log(response?.data, "response.data");
+      // const userid = data.find((e) => e._id === d._id);
+      // if (userid) {
+      //   setName(userid.username);
+      // } else {
+      //   console.log("Not getting user");
+      // }
+    } catch (e) {
+      console.error("No User found", e.message);
+    }
+  };
+  useEffect(() => {
+    userdata();
+  }, []);
 
   const closeModal = () => {
     setIsModalOpen(false);

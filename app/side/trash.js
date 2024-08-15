@@ -205,3 +205,25 @@
     );
   })}
 </>;
+
+// const getTeams = async () => {
+//   try {
+//     const response = await axios.get(`${API}/getteams/${data?.orgid?.[0]}`);
+
+//     const updatedTeams = response.data.teams.map((team) => {
+//       // If the current user is member of the team than show the team there else not
+//       const filteredMembers = team.members.filter(
+//         (member) => member._id === data?.id
+//       );
+//       console.log(filteredMembers, "filteredMembers");
+//       return {
+//         ...team,
+//         members: filteredMembers,
+//       };
+//     });
+//     setTeam(updatedTeams);
+//     //setTeam(response.data.teams);
+//   } catch (error) {
+//     console.error("Error fetching data:", error);
+//   }
+// };

@@ -24,9 +24,7 @@ function Addteamtask({ isOpen, onClose }) {
   const func = async () => {
     try {
       setLoad(true);
-      const response = await axios.get(
-        `http://localhost:7900/api/getmembers/${data?.orgid?.[0]}`
-      );
+      const response = await axios.get(`${API}/getmembers/${data?.orgid?.[0]}`);
       setMemdata(response?.data);
       console.log(response?.data);
     } catch (e) {
@@ -98,8 +96,8 @@ function Addteamtask({ isOpen, onClose }) {
 
   return (
     <div className="fixed top-0 left-0 h-screen w-screen flex justify-center items-center bg-opacity-50 bg-gray-800">
-      <div className=" rounded-xl bg-white pn:max-sm:w-[100%] pn:max-sm:h-[100%] flex-col sm:flex-row p-2 gap-2 flex justify-evenly items-center ">
-        <div className="h-[280px] bg-red-300 w-[300px] ">
+      <div className=" sm:rounded-xl bg-white pn:max-sm:w-[100%] pn:max-sm:h-[100%] flex-col sm:flex-row p-2 gap-2 flex justify-evenly items-center ">
+        <div className="h-[280px] w-[90%] sm:w-[300px] ">
           <div className="h-[10%] w-full">
             <div className="text-[16px] text-black flex items-center h-[100%] font-semibold ">
               Add New Task
@@ -115,7 +113,7 @@ function Addteamtask({ isOpen, onClose }) {
             placeholder="What is the task?"
           />
         </div>
-        <div className="flex flex-col bg-green-300 h-[280px] w-[300px]">
+        <div className="flex flex-col h-[280px] w-[90%] sm:w-[300px]">
           {/* Assigning task options */}
           <div className="flex flex-row  h-[40px]  justify-between items-center w-[100%]">
             {/* <div className="flex flex-row h-[100%] items-center  w-[45%] justify-between">
@@ -171,14 +169,14 @@ function Addteamtask({ isOpen, onClose }) {
               ))
             )}
 
-            <div className="w-[98%] my-2 px-2 border-b-[1px] font-semibold  border-[#f1f1f1] h-[40px]  flex flex-row items-center ">
+            <div className="w-[98%] my-1 px-1 border-b-[1px] font-semibold  border-[#f1f1f1] h-[40px] text-[14px] flex flex-row items-center ">
               Teams
             </div>
             {teamload ? (
-              <div className="w-[98%] my-2 px-2 border-b-[1px]  border-[#f1f1f1] h-[40px]  flex flex-row items-center ">
+              <div className="w-[98%] my-2 px-2 border-b-[1px]  border-[#f1f1f1] h-[40px] flex flex-row items-center ">
                 <div className="h-[35px] w-[35px] object-contain bg-[#888] rounded-full" />
 
-                <div className=" mx-3  w-[40%] text-[#121212] text-[14px]  outline-none"></div>
+                <div className=" mx-3  w-[40%] text-[#121212] text-[14px] outline-none"></div>
                 <div className=" text-[#444444] text-[13px]  outline-none"></div>
               </div>
             ) : (
@@ -203,7 +201,7 @@ function Addteamtask({ isOpen, onClose }) {
               ))
             )}
           </div>
-          <div className="flex flex-row justify-between  items-center w-[100%] h-[10%]">
+          <div className="flex flex-row justify-between gap-2 bg-slate-500 items-center w-[100%] h-[10%]">
             <div
               onClick={onClose}
               className="w-[50%] py-2 flex justify-center items-center text-black text-[14px] font-semibold h-[100%] bg-white rounded-3xl"

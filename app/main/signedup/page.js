@@ -16,30 +16,12 @@ import { API } from "@/utils/Essentials";
 function page() {
   const router = useRouter();
   const search = useSearchParams();
-  // const fsd = search.get("data");
-  // const fsdd = fsd ? JSON.parse(fsd) : null;
-  // console.log(JSON.parse(decodeURIComponent(fsdd?.image)), "fsdd");
-
-  const email = search.get("email");
-  const image = search.get("image");
-  // console.log(
-  //   JSON.parse(decodeURIComponent(image)),
-  //   image,
-  //   decodeURIComponent(image),
-  //   "kkk"
-  // );
   const fullname = search.get("fullname");
   const password = search.get("password");
+  const email = localStorage.getItem("email");
 
-  console.log(email, "ll");
   const dispatch = useDispatch();
-  console.log(
-    email,
-    // image,
-    fullname,
-    password,
-    "email, fullname, password, image"
-  );
+
   const [username, setUsername] = useState("");
   //const [password, setPassword] = useState("");
   const [org, setOrg] = useState("");
@@ -99,13 +81,13 @@ function page() {
       const response = await axios.post(`${API}/signup`, {
         org,
         email,
-        username: fullname,
+
         jobrole,
-        password,
-        image,
+
+        // image,
       });
       if (response.status === 200) {
-        router.push("../main/signin");
+        router.push("../side/todo");
       } else {
         console.log("User unable to signup");
       }
@@ -132,7 +114,16 @@ function page() {
           className="max-lg:hidden object-contain w-[600px] h-[600px]"
         />
         <div className="h-[95%] w-[400px] rounded-2xl bg-white flex flex-col justify-center items-center">
+          {/* <div
+            onClick={() => {
+              router.push("../side/todo");
+            }}
+            className="text-[12px] font-semibold text-gray-800 justify-end w-[90%]  flex"
+          >
+            Skip
+          </div> */}
           {/* Create /Join */}
+          {/* <div className="h-[90%] w-[100%] flex justify-center items-center"> */}
           {join === 0 ? (
             <div className="flex flex-col">
               <div
@@ -156,6 +147,7 @@ function page() {
               </div>
             </div>
           ) : null}
+          {/* </div> */}
 
           {/* Create Organization */}
           {join === 1 ? (
